@@ -436,6 +436,7 @@ const emptyAppContext = createAppContext()
 
 let uid = 0
 
+// Mynote: 创建组件实例
 export function createComponentInstance(
   vnode: VNode,
   parent: ComponentInternalInstance | null,
@@ -575,7 +576,9 @@ export function setupComponent(
   isInSSRComponentSetup = isSSR
 
   const { props, children } = instance.vnode
+  // 是否为状态组件
   const isStateful = isStatefulComponent(instance)
+  // 初始化props&slots
   initProps(instance, props, isStateful, isSSR)
   initSlots(instance, children)
 
@@ -630,15 +633,20 @@ function setupStatefulComponent(
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
 
+    // 记录当前正在初始化的实例
     setCurrentInstance(instance)
+    // 暂停依赖收集
     pauseTracking()
+    // 执行setup函数
     const setupResult = callWithErrorHandling(
       setup,
       instance,
       ErrorCodes.SETUP_FUNCTION,
       [__DEV__ ? shallowReadonly(instance.props) : instance.props, setupContext]
     )
+    // 恢复依赖收集
     resetTracking()
+    // 重置当前记录的实例
     unsetCurrentInstance()
 
     if (isPromise(setupResult)) {
@@ -664,6 +672,7 @@ function setupStatefulComponent(
         )
       }
     } else {
+      // 将setup的执行结果挂载到组件实例上
       handleSetupResult(instance, setupResult, isSSR)
     }
   } else {

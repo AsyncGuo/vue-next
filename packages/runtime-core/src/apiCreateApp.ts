@@ -177,13 +177,15 @@ export function createAppAPI<HostElement>(
   render: RootRenderFunction,
   hydrate?: RootHydrateFunction
 ): CreateAppFunction<HostElement> {
+  // MyNote: 真正的入口，接受根级组件和组件属性
   return function createApp(rootComponent, rootProps = null) {
     if (rootProps != null && !isObject(rootProps)) {
       __DEV__ && warn(`root props passed to app.mount() must be an object.`)
       rootProps = null
     }
-
+    // 创建vue应用上下文，包括app本身、config、mixins、components、directives
     const context = createAppContext()
+    // 已安装的vue插件
     const installedPlugins = new Set()
 
     let isMounted = false
@@ -210,6 +212,7 @@ export function createAppAPI<HostElement>(
         }
       },
 
+      // 安装插件
       use(plugin: Plugin, ...options: any[]) {
         if (installedPlugins.has(plugin)) {
           __DEV__ && warn(`Plugin has already been applied to target app.`)
@@ -273,33 +276,40 @@ export function createAppAPI<HostElement>(
         return app
       },
 
+      // 应用挂载的主逻辑，即：app.mount()
       mount(
         rootContainer: HostElement,
         isHydrate?: boolean,
         isSVG?: boolean
       ): any {
         if (!isMounted) {
+          // 创建根组件的vnode
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps
           )
           // store app context on the root VNode.
           // this will be set on the root instance on initial mount.
+          // 根组件存储应用上下文
           vnode.appContext = context
 
           // HMR root reload
           if (__DEV__) {
+            // 热更新
             context.reload = () => {
               render(cloneVNode(vnode), rootContainer, isSVG)
             }
           }
 
           if (isHydrate && hydrate) {
+            // 服务端渲染
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
+            // 组件渲染
             render(vnode, rootContainer, isSVG)
           }
           isMounted = true
+          // 记录整个应用的根组件的容器
           app._container = rootContainer
           // for devtools and telemetry
           ;(rootContainer as any).__vue_app__ = app

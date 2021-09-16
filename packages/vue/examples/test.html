@@ -1,0 +1,56 @@
+<script src="./../dist/vue.global.js"></script>
+
+<div id="app">
+  <div>static node</div>
+  <div>title: {{title}}</div>
+  <button @click="add">click</button>
+  <Item :msg="title"/>
+</div>
+
+<script>
+const Item = {
+  props: ['msg'],
+  template: `<div>{{ msg }} <button @click="$emit('rm')">x</button></div>`
+}
+
+console.log('Vue',Vue);
+const app = Vue.createApp(
+  
+
+{
+  components: {
+    Item
+  },
+  setup(props, {emit}) {
+    const add = () => {}
+    return {
+      title: Vue.ref(1),
+    }
+    // return () => 
+    //   Vue.h('div', null, ['test'])
+    
+  },
+  data() {
+    return {
+      title: 'data title'
+    }
+  },
+  methods: {
+    add() {
+      this.title += 1
+    }
+  },
+  created() {
+    this.$text = ''
+  }
+  // render() {
+  //   return Vue.h('div', null, ['test-render'])
+  // }
+}
+
+
+)
+
+
+app.mount('#app')
+</script>

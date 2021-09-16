@@ -400,6 +400,7 @@ function createBaseVNode(
   isBlockNode = false,
   needFullChildrenNormalization = false
 ) {
+  // 默认vnode格式
   const vnode = {
     __v_isVNode: true,
     __v_skip: true,
@@ -487,6 +488,7 @@ function _createVNode(
   children: unknown = null,
   patchFlag: number = 0,
   dynamicProps: string[] | null = null,
+  // 是否创建block
   isBlockNode = false
 ): VNode {
   if (!type || type === NULL_DYNAMIC_COMPONENT) {
@@ -496,6 +498,7 @@ function _createVNode(
     type = Comment
   }
 
+  // type为vnode时，直接clone
   if (isVNode(type)) {
     // createVNode receiving an existing vnode. This happens in cases like
     // <component :is="vnode"/>
