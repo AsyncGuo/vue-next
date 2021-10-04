@@ -48,7 +48,8 @@ import {
   KEEP_ALIVE,
   SUSPENSE,
   UNREF,
-  GUARD_REACTIVE_PROPS
+  GUARD_REACTIVE_PROPS,
+  IS_REF
 } from '../runtimeHelpers'
 import {
   getInnerRange,
@@ -61,7 +62,7 @@ import {
 } from '../utils'
 import { buildSlots } from './vSlot'
 import { getConstantType } from './hoistStatic'
-import { BindingMetadata, BindingTypes } from '../options'
+import { BindingTypes } from '../options'
 import {
   checkCompatEnabled,
   CompilerDeprecationTypes,
@@ -471,11 +472,11 @@ export function buildProps(
         hasRef = true
         // in inline mode there is no setupState object, so we can't use string
         // keys to set the ref. Instead, we need to transform it to pass the
-        // acrtual ref instead.
+        // actual ref instead.
         if (!__BROWSER__ && context.inline && value?.content) {
           valueNode = createFunctionExpression(['_value', '_refs'])
           valueNode.body = createBlockStatement(
-            processInlineRef(context.bindingMetadata, value.content)
+            processInlineRef(context, value.content)
           )
         }
       }
@@ -806,7 +807,7 @@ function dedupeProperties(properties: Property[]): Property[] {
     const name = prop.key.content
     const existing = knownProps.get(name)
     if (existing) {
-      if (name === 'style' || name === 'class' || name.startsWith('on')) {
+      if (name === 'style' || name === 'class' || isOn(name)) {
         mergeAsArray(existing, prop)
       }
       // unexpected duplicate, should have emitted error during parse
@@ -894,15 +895,28 @@ function isComponentTag(tag: string) {
 }
 
 function processInlineRef(
-  bindings: BindingMetadata,
+  context: TransformContext,
   raw: string
 ): JSChildNode[] {
   const body = [createSimpleExpression(`_refs['${raw}'] = _value`)]
-  const type = bindings[raw]
+  const { bindingMetadata, helperString } = context
+  const type = bindingMetadata[raw]
   if (type === BindingTypes.SETUP_REF) {
     body.push(createSimpleExpression(`${raw}.value = _value`))
+  } else if (type === BindingTypes.SETUP_MAYBE_REF) {
+    body.push(
+      createSimpleExpression(
+        `${helperString(IS_REF)}(${raw}) && (${raw}.value = _value)`
+      )
+    )
   } else if (type === BindingTypes.SETUP_LET) {
-    body.push(createSimpleExpression(`${raw} = _value`))
+    body.push(
+      createSimpleExpression(
+        `${helperString(
+          IS_REF
+        )}(${raw}) ? ${raw}.value = _value : ${raw} = _value`
+      )
+    )
   }
   return body
 }

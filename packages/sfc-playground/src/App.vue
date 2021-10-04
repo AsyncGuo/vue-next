@@ -3,7 +3,11 @@ import Header from './Header.vue'
 import { Repl, ReplStore } from '@vue/repl'
 import { watchEffect } from 'vue'
 
-document.documentElement.style.setProperty('--vh', window.innerHeight + `px`)
+const setVH = () => {
+  document.documentElement.style.setProperty('--vh', window.innerHeight + `px`)
+}
+window.addEventListener('resize', setVH)
+setVH()
 
 const store = new ReplStore({
   serializedState: location.hash.slice(1),
@@ -12,13 +16,27 @@ const store = new ReplStore({
     : `${location.origin}/src/vue-dev-proxy`
 })
 
+// enable experimental features
+const sfcOptions = {
+  script: {
+    refTransform: true,
+    propsDestructureTransform: true
+  }
+}
+
 // persist state
 watchEffect(() => history.replaceState({}, '', store.serialize()))
 </script>
 
 <template>
   <Header :store="store" />
-  <Repl :store="store" :showCompileOutput="true" />
+  <Repl
+    :store="store"
+    :showCompileOutput="true"
+    :autoResize="true"
+    :sfcOptions="sfcOptions"
+    :clearConsole="false"
+  />
 </template>
 
 <style>

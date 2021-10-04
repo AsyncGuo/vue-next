@@ -90,7 +90,7 @@ describe('with object props', () => {
       ff: Function as PropType<(a: number, b: string) => { a: boolean }>,
       // explicit type casting with constructor
       ccc: Array as () => string[],
-      // required + contructor type casting
+      // required + constructor type casting
       ddd: {
         type: Array as () => string[],
         required: true
@@ -333,35 +333,31 @@ describe('with object props', () => {
   })
 })
 
-// describe('type inference w/ optional props declaration', () => {
-//   const MyComponent = defineComponent({
-//     setup(_props: { msg: string }) {
-//       return {
-//         a: 1
-//       }
-//     },
-//     render() {
-//       expectType<string>(this.$props.msg)
-//       // props should be readonly
-//       expectError((this.$props.msg = 'foo'))
-//       // should not expose on `this`
-//       expectError(this.msg)
-//       expectType<number>(this.a)
-//       return null
-//     }
-//   })
+describe('type inference w/ optional props declaration', () => {
+  const MyComponent = defineComponent<{ a: string[]; msg: string }>({
+    setup(props) {
+      expectType<string>(props.msg)
+      expectType<string[]>(props.a)
+      return {
+        b: 1
+      }
+    }
+  })
 
-//   expectType<JSX.Element>(<MyComponent msg="foo" />)
-//   expectError(<MyComponent />)
-//   expectError(<MyComponent msg={1} />)
-// })
+  expectType<JSX.Element>(<MyComponent msg="1" a={['1']} />)
+  // @ts-expect-error
+  expectError(<MyComponent />)
+  // @ts-expect-error
+  expectError(<MyComponent msg="1" />)
+})
 
-// describe('type inference w/ direct setup function', () => {
-//   const MyComponent = defineComponent((_props: { msg: string }) => {})
-//   expectType<JSX.Element>(<MyComponent msg="foo" />)
-//   expectError(<MyComponent />)
-//   expectError(<MyComponent msg={1} />)
-// })
+describe('type inference w/ direct setup function', () => {
+  const MyComponent = defineComponent((_props: { msg: string }) => {})
+  expectType<JSX.Element>(<MyComponent msg="foo" />)
+  // @ts-expect-error
+  expectError(<MyComponent />)
+  expectError(<MyComponent msg="1" />)
+})
 
 describe('type inference w/ array props declaration', () => {
   const MyComponent = defineComponent({
