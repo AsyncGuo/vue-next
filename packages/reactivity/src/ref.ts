@@ -124,7 +124,9 @@ export function unref<T>(ref: T | Ref<T>): T {
 }
 
 const shallowUnwrapHandlers: ProxyHandler<any> = {
-  get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
+  get: (target, key, receiver) => {
+    return unref(Reflect.get(target, key, receiver))
+  },
   set: (target, key, value, receiver) => {
     const oldValue = target[key]
     if (isRef(oldValue) && !isRef(value)) {

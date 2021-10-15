@@ -77,13 +77,20 @@ function createArrayInstrumentations() {
   return instrumentations
 }
 
+// 创建getter拦截器
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target: Target, key: string | symbol, receiver: object) {
+    // 访问属性：__v_isReactive
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly
+      // 访问属性：__v_isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
       return isReadonly
     } else if (
+      // 访问属性：__v_raw，并保证触发拦截器getter的是proxy对象本身
+      // 触发拦截器的方式：
+      // 1. 访问proxy对象本身的属性
+      // 2. 访问对象原型链上有proxy对象的对象的属性，因为查询属性会沿着原型链向下继续查找，同样会触发拦截器
       key === ReactiveFlags.RAW &&
       receiver ===
         (isReadonly
@@ -197,6 +204,7 @@ function ownKeys(target: object): (string | symbol)[] {
   return Reflect.ownKeys(target)
 }
 
+// 对象和数组对应的proxy的handler
 export const mutableHandlers: ProxyHandler<object> = {
   get,
   set,
