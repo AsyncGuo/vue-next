@@ -1232,7 +1232,7 @@ function baseCreateRenderer(
         parentComponent,
         parentSuspense
       ))
-
+    console.log('组件实例instance: ', instance)
     if (__DEV__ && instance.type.__hmrId) {
       registerHMR(instance)
     }
@@ -1272,6 +1272,8 @@ function baseCreateRenderer(
       }
       return
     }
+
+    console.log('设置完成后的组件实例instance: ', instance)
 
     // 设置并运行带有副作用的渲染函数
     setupRenderEffect(
@@ -1409,6 +1411,8 @@ function baseCreateRenderer(
           // 1. 依赖收集：执行render函数会访问组件实例上的响应式数据，触发依赖收集，当前定义的 renderEffect 会被收集到依赖仓库
           // 2. 派发更新：数据变化时，renderEffect会被派发，触发re-render
           const subTree = (instance.subTree = renderComponentRoot(instance))
+          console.log('子树vnode subTree: ', subTree)
+
           if (__DEV__) {
             endMeasure(instance, `render`)
           }

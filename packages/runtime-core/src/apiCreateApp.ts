@@ -289,6 +289,8 @@ export function createAppAPI<HostElement>(
             rootComponent as ConcreteComponent,
             rootProps
           )
+          console.log('根组件rootComponent对应的vnode: ', vnode)
+
           // store app context on the root VNode.
           // this will be set on the root instance on initial mount.
           // 根组件存储应用上下文
